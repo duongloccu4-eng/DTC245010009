@@ -1,14 +1,13 @@
-version: '3.8'
+version: '3.3'
 
 networks:
   frontend-net:
     driver: bridge
   backend-net:
     driver: bridge
-    internal: true # Isolates database from external access
+    internal: true
 
 services:
-  # Database MySQL
   db:
     image: mysql:8.0
     container_name: wordpress_db
@@ -23,7 +22,6 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
-  # WordPress Web App
   wordpress:
     image: wordpress:latest
     container_name: wordpress_app
@@ -41,7 +39,6 @@ services:
     volumes:
       - wp_data:/var/www/html
 
-  # Database Management (phpMyAdmin)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: wordpress_pma
@@ -56,7 +53,6 @@ services:
       - frontend-net
       - backend-net
 
-  # Reverse Proxy Nginx
   nginx:
     image: nginx:alpine
     container_name: nginx_proxy
@@ -71,11 +67,7 @@ services:
       - wordpress
       - phpmyadmin
 
-volumes:
-  db_data:
-  wp_data:
-
-prometheus:
+  prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: always
@@ -94,7 +86,8 @@ prometheus:
       - "3000:3000"
     networks:
       - frontend-net
-loki:
+
+  loki:
     image: grafana/loki:2.9.0
     container_name: loki
     ports:
@@ -115,3 +108,7 @@ loki:
     command: -config.file=/etc/promtail/config.yml
     networks:
       - frontend-net
+
+volumes:
+  db_data:
+  wp_data:
